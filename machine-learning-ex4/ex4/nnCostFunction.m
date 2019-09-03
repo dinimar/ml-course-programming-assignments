@@ -41,11 +41,13 @@ Theta2_grad = zeros(size(Theta2));
 %
 
 % Add ones to the X data matrix
-X = [ones(m, 1) X];
-a2 = sigmoid(X*Theta1');
+a1 = [ones(m, 1) X];
+z2 = a1*Theta1';
+a2 = sigmoid(z2);
 % Add ones to the a2 data matrix
-a2 = [ones(m, 1) a2];
-a3 = sigmoid(a2*Theta2');
+a2 = [ones(size(a2, 1), 1) a2];
+z3 = a2*Theta2';
+a3 = sigmoid(z3);
 h = a3;
 
 % Create Y samples
@@ -75,8 +77,36 @@ J = (1/m)*sum(sum((-Y).*log(h)-(1-Y).*log(1-h))) + reg_j;
 %               over the training examples if you are implementing it for the 
 %               first time.
 %
-delta_L = a3 - y;
+delta3 = [];
+delta2 = [];
 
+for t=1:m
+%     Step 1
+    y_t = Y(t, :);
+    a1_t = X(t, :)';
+    % Add ones to the a1_t data matrix
+    a1_t = [1; a1_t];
+    z2_t = Theta1*a1_t;
+    a2_t = sigmoid(z2_t);
+    % Add ones to the a2_t data matrix
+    a2_t = [1; a2_t];
+    z3_t = Theta2*a2_t;
+    a3_t = sigmoid(z3_t);
+%     Step 2
+    delta3_t = a3_t-y_t';
+%     Step 3
+    z2_t = [1; z2_t];
+    g_prime_t = sigmoidGradient(z2_t);
+    delta2_t = (Theta2'*delta3_t).*g_prime_t;
+%     Step 4
+    delta2_t = delta2_t(2:end);
+%     Step 5 
+    Theta2_grad = (Theta2_grad + delta3_t*a2_t'); 
+    Theta1_grad = (Theta1_grad + delta2_t*a1_t');
+end
+
+Theta2_grad = Theta2_grad ./ m;
+Theta1_grad = Theta1_grad ./ m;
 
 % Part 3: Implement regularization with the cost function and gradients.
 %
