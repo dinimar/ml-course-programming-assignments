@@ -22,8 +22,40 @@ for epsilon = min(pval):stepsize:max(pval)
     %               
     % Note: You can use predictions = (pval < epsilon) to get a binary vector
     %       of 0's and 1's of the outlier predictions
-
-
+    predictions = (pval < epsilon);
+%     Get indices of all anomalous and not examples
+    an = find(yval);
+    n_an = find(yval == 0);
+%     Caclculate tp
+    tp = 0;
+    for i=1:size(an,1)
+        idx = an(i);
+        if (predictions(idx) == yval(idx))
+           tp = tp + 1; 
+        end
+    end
+    %     Calculate fp
+    fp = 0;
+    for i=1:size(n_an,1)
+        idx = n_an(i);
+        if(predictions(idx) ~= yval(idx))
+            fp = fp + 1;
+        end
+    end
+    %     Calculate fn
+    fn = 0;
+    for i=1:size(an,1)
+        idx = an(i);
+        if(predictions(idx) ~= yval(idx))
+            fn = fn + 1;
+        end
+    end
+%     Calculate F1
+    prec = tp/(tp+fp);
+    rec = tp/(tp+fn);
+    F1 = (2*prec*rec)/(prec+rec);
+    
+    
 
 
 
